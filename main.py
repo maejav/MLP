@@ -30,7 +30,7 @@ def train_banknot():
     train_data = np.concatenate((X_train, y_train), axis=1)
 
 
-    train_data = torch.tensor(train_data).float()
+    train_data = torch.tensor(train_data).float()  ### convert to torch 
     # train_data.requires_grad_= True
     # x_test = torch.tensor(X_test).float()
     # x_valid = torch.tensor(X_valid).float()

@@ -9,19 +9,30 @@ class BanknoteDataset(Dataset):
         # self.traindata =##
         # self.evaluationdata=##
         # self.testdata = ##
-
-        print("number of features:",len(self.dataframe.columns))
-        self.input_dim = len(self.dataframe.columns)-1 ####
-        print("input dimension :", self.input_dim)
-        raw_data =  self.dataframe.iloc[:, :self.input_dim ]
+        # print("number of features:",len(self.dataframe.columns))
+        self.input_dim = len(self.dataframe.columns)-1 #### input dimension except labels 
+        # print("input dimension :", self.input_dim)
+        raw_data =  self.dataframe.iloc[:, :self.input_dim ] ### input date exccept labels
         self.data = raw_data.values
         # self.data[:,self``.input_dim] = self.data[:,self.input_dim]-1
-        print("we are in original data")
-
-        print(self.data)
+        # print("we are in original data")
+        # print(self.data)
         raw_labels = self.dataframe.iloc[:, self.input_dim]
-        self.labels = raw_labels.values - 1
-        print(self.labels)
+        self.labels = raw_labels.values - 1 ### convert to binary form for classification 
+        # print(self.labels)
+
+    def __getitem__(self, index):
+        item = (self.data[index, :], self.labels[index])
+        return item
+    def __len__(self):
+        return len(self.data)
+
+        
+
+
+
+
+
 
 
 
