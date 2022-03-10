@@ -8,12 +8,19 @@ from sklearn.model_selection import  train_test_split
 import numpy as np
 
 def train_banknot():
+    index = 4
 
     torch.manual_seed(42) ###for being  reproducible program 
 
 
     ### create object of dataset 
     banknotedataset = BanknoteDataset("banknote-authentication_csv.csv")
+
+
+
+    ### get sample 
+    (features, label) = banknotedataset.__getitem__(index)
+    print((features, label))
 
     ### prepare data 
     X, X_test, y, y_test  = train_test_split(\
