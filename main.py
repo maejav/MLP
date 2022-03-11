@@ -1,5 +1,5 @@
 import torch 
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, random_split
 from BanknoteDateset import BanknoteDataset
 from BanknoteLoss import BanknoteLoss
 from BanknoteOptimizer import BanknoteOptimizer
@@ -8,7 +8,7 @@ from sklearn.model_selection import  train_test_split
 import numpy as np
 
 def train_banknot():
-    index = 4
+    index = 2
 
     torch.manual_seed(42) ###for being  reproducible program 
 
@@ -19,25 +19,39 @@ def train_banknot():
 
 
     ### get sample 
+
     (features, label) = banknotedataset.__getitem__(index)
     print((features, label))
+    
+    ### prepare number of train data and test and validation 
+    lengthss = [int(len(banknotedataset.all_data)* 0.7) ,int(len(banknotedataset.all_data)* 0.2),\
+    int(len(banknotedataset.all_data)* 0.1)+1 ]
+    print(len(banknotedataset.all_data))
+    print(lengthss)
 
-    ### prepare data 
-    X, X_test, y, y_test  = train_test_split(\
-        banknotedataset.data, banknotedataset.labels, test_size=0.2 , random_state=42)
+    train_data, test_data, validation_data = random_split(banknotedataset.all_data, lengthss)
+    
+    print("ttttttttttttttttttttttype:::", type(train_data.dataset))
+    print("ttttttttttttttttttttttype:::", train_data.dataset)
 
-    X_train, X_valid, y_train, y_valid = train_test_split( \
-        X, y, test_size=0.1 , random_state=42)
+
+
+    # ### prepare data 
+    # X, X_test, y, y_test  = train_test_split(\
+    #     banknotedataset.data, banknotedataset.labels, test_size=0.2 , random_state=42)
+
+    # X_train, X_valid, y_train, y_valid = train_test_split( \
+    #     X, y, test_size=0.1 , random_state=42)
 
    
-    y_train = y_train.reshape(-1,1)
-    print(np.shape(X_train))
-    print(np.shape(y_train))
+    # y_train = y_train.reshape(-1,1)
+    # print(np.shape(X_train))
+    # print(np.shape(y_train))
 
-    train_data = np.concatenate((X_train, y_train), axis=1)
+    # train_data = np.concatenate((X_train, y_train), axis=1)
 
 
-    train_data = torch.tensor(train_data).float()  ### convert to torch 
+    # train_data = torch.tensor(train_data).float()  ### convert to torch 
     # train_data.requires_grad_= True
     # x_test = torch.tensor(X_test).float()
     # x_valid = torch.tensor(X_valid).float()
@@ -45,7 +59,7 @@ def train_banknot():
     # y_test = torch.tensor(y_test).float()
     # y_valid = torch.tensor(y_valid).float()
 
-    dataloader = DataLoader(train_data, batch_size=10, shuffle=True)
+    dataloader = DataLoader(train_data.dataset, batch_size=10, shuffle=True)
 
     ### hyperparameter 
     lr=0.01
@@ -79,6 +93,7 @@ def train_banknot():
     for epoch in range(num_epoch):
 
         for  _, data_batch in enumerate(dataloader):
+            # print("print databatch:::::::::", data_batch[:, :4])
             optimizer.zero_grad()
             # print(data_batch[:, :4])
 
@@ -92,6 +107,9 @@ def train_banknot():
             # out = out.view(-1,1)
             # print(data_batch[:, 4])
             labels = data_batch[:, 4].view(-1,1)
+            # labels = data_batch[:, 4]
+            # print(labels)
+
             # print(labels)
             
             # prob = torch.tensor([0.3,0.4,0.6,0.7])
@@ -165,7 +183,7 @@ def train_banknot():
 def evaluate_banknote():
     pass
 
-if __name__=="__main__":
+if __name__ == "__main__":
     train_banknot()
 
   
