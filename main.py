@@ -8,33 +8,19 @@ from sklearn.model_selection import  train_test_split
 import numpy as np
 
 def train_banknot():
-    index = 2
 
     torch.manual_seed(42) ###for being  reproducible program 
-
 
     ### create object of dataset 
     banknotedataset = BanknoteDataset("banknote-authentication_csv.csv")
 
-
-
-    ### get sample 
-
-    (features, label) = banknotedataset.__getitem__(index)
-    print((features, label))
-    
     ### prepare number of train data and test and validation 
-    lengthss = [int(len(banknotedataset.all_data)* 0.7) ,int(len(banknotedataset.all_data)* 0.2),\
-    int(len(banknotedataset.all_data)* 0.1)+1 ]
+    lengthss = [int(len(banknotedataset)* 0.7) ,int(len(banknotedataset)* 0.2),\
+    int(len(banknotedataset)* 0.1)+1 ]
     print(len(banknotedataset.all_data))
     print(lengthss)
 
-    train_data, test_data, validation_data = random_split(banknotedataset.all_data, lengthss)
-    
-    print("ttttttttttttttttttttttype:::", type(train_data.dataset))
-    print("ttttttttttttttttttttttype:::", train_data.dataset)
-
-
+    train_data, test_data, validation_data = random_split(banknotedataset, lengthss)
 
     # ### prepare data 
     # X, X_test, y, y_test  = train_test_split(\
@@ -51,15 +37,11 @@ def train_banknot():
     # train_data = np.concatenate((X_train, y_train), axis=1)
 
 
-    # train_data = torch.tensor(train_data).float()  ### convert to torch 
-    # train_data.requires_grad_= True
-    # x_test = torch.tensor(X_test).float()
-    # x_valid = torch.tensor(X_valid).float()
-    # y_train = torch.tensor(y_train).float()
-    # y_test = torch.tensor(y_test).float()
-    # y_valid = torch.tensor(y_valid).float()
+   
 
-    dataloader = DataLoader(train_data.dataset, batch_size=10, shuffle=True)
+    dataloader_train = DataLoader(train_data.dataset, batch_size=10, shuffle=True)
+    dataloader_validation = DataLoader(validation_data.dataset, batch_size=10, shuffle=True)
+    dataloader_test = DataLoader(test_data.dataset, batch_size=10, shuffle=True)
 
     ### hyperparameter 
     lr=0.01
@@ -73,11 +55,10 @@ def train_banknot():
         param.requires_grad_= True
 
 
-    print("rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr")
-    print(model.fc1.weight.requires_grad_)   
-    print(model.fc2.weight.requires_grad_)   
-         
-
+    # print("rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr")
+    # print(model.fc1.weight.requires_grad_)   
+    # print(model.fc2.weight.requires_grad_)   
+    
     ### set loss function and optimizer 
 
     # CentropyLoss = BanknoteLoss()
@@ -88,66 +69,47 @@ def train_banknot():
     # optimizer = BanknoteOptimizer(model.parameters, lr=0.01)
     optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
 
-    ### train model 
+    ### train model )
+    iter_dataloader_validation = iter(dataloader_validation)
+
+    number_of_batch_validation =len(dataloader_validation)
+    counter_valid=0
+
+    # for data in range(len(dataloader_validation)):
+    #     (data, label) = next(iter_dataloader_validation)
+    #     print(data ,label)
 
     for epoch in range(num_epoch):
 
-        for  _, data_batch in enumerate(dataloader):
-            # print("print databatch:::::::::", data_batch[:, :4])
+        for (data_batch, label_batch) in dataloader_train:
+            model.train()
             optimizer.zero_grad()
-            # print(data_batch[:, :4])
-
-
-        # out=my_model(iris_dataset.x[iris_train.indices])
-        # loss = criterion(out, iris_dataset.y[iris_train.indices])
-
-            out = model(data_batch[:, :4])
-            # print(data_batch)
-            # print(out)
-            # out = out.view(-1,1)
-            # print(data_batch[:, 4])
-            labels = data_batch[:, 4].view(-1,1)
-            # labels = data_batch[:, 4]
-            # print(labels)
-
-            # print(labels)
-            
-            # prob = torch.tensor([0.3,0.4,0.6,0.7])
-            # out = (prob>0.5).float()
-
+            out = model(data_batch)
+            labels = label_batch.view(-1,1)
             # out = (out>=0.5).float()   #### lazem nist taghir koneh? va aya age tageer\????
             # bedam requires_grad ham false mish???
-            # print(out)
-
-            
-            
-
             # _, predicted = torch.max(out, 1)
 
-            
-            # predicted = predicted.view(-1)
-            # target = data_batch[:,4].view(-1)
-            # print(target.dim())
-            # print(predicted.dim())  
-            # out.requires_grad_=True
-            # loss_value = loss(predicted, target)
-            # # loss = CentropyLoss(predicted, data_batch[:,4])
-
-
-
-
             loss_value =loss(out, labels)
-            
-
-            # print(loss_value)
-            # # CentropyLoss.backward()
             loss_value.backward()
 
             optimizer.step()
-        if epoch % 5 == 0:
-                print('Epoch [%d/%d] Train Loss: %.4f' % (epoch , num_epoch, loss_value.item()*100))
-    
 
+        if epoch % 9 == 0:
+            if counter_valid<number_of_batch_validation :
+                with torch.no_grad():
+                    model.eval()
+                    (data, label) = next(iter_dataloader_validation)
+                    out = model(data)
+                    label_val = label.view(-1,1)
+                    loss_value_valid=loss(out, label_val)
+                    print('Epoch [%d/%d] Train Loss: %.4f' % (epoch , num_epoch,\
+                    loss_value.item()))
+                    print('Epoch [%d/%d] Validation Loss: %.4f' % (epoch , num_epoch, \
+                    loss_value_valid.item()))
+
+    
+# with torch.no_grad        
    
 
 

@@ -5,14 +5,17 @@ import pandas as pd
 class BanknoteDataset(Dataset):
     def __init__(self, Url):
         super(BanknoteDataset, self).__init__()
-        self.dataframe = pd.read_csv(Url)
+        self.dataframe = pd.read_csv(Url).set_index('V1')
+
+        # self.dataframe=self.dataframe.set_index('V1')
         # self.traindata =##
         # self.evaluationdata=##
         # self.testdata = ##
         # print("number of features:",len(self.dataframe.columns))
         self.input_dim = len(self.dataframe.columns)-1 #### input dimension except labels 
         # print("input dimension :", self.input_dim)
-        all_data = self.dataframe.iloc[:, :self.input_dim+1 ]
+        all_data = self.dataframe.iloc[:, :self.input_dim+1]
+        all_data.iloc[:, self.input_dim] = all_data.iloc[:, self.input_dim]-1
         self.all_data = all_data.values
         raw_data =  self.dataframe.iloc[:, :self.input_dim ] ### input date exccept labels
         self.data = raw_data.values
@@ -25,6 +28,10 @@ class BanknoteDataset(Dataset):
         self.all_data = torch.FloatTensor(self.all_data)
         self.data = torch.FloatTensor(self.data)
         self.labels = torch.FloatTensor(self.labels)
+
+        self.x = torch.FloatTensor(self.data)
+        self.y = torch.FloatTensor(self.labels)
+
 
     def __getitem__(self, index):
         # if index <= len(self.data):
@@ -48,8 +55,6 @@ class BanknoteDataset(Dataset):
 
     def __len__(self):
         return len(self.data) ### recommand to write len(self.labels) it is an important point 
-
-
 
 
 
