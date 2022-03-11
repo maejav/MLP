@@ -17,8 +17,6 @@ def train_banknot():
     ### prepare number of train data and test and validation 
     lengthss = [int(len(banknotedataset)* 0.7) ,int(len(banknotedataset)* 0.2),\
     int(len(banknotedataset)* 0.1)+1 ]
-    print(len(banknotedataset.all_data))
-    print(lengthss)
 
     train_data, test_data, validation_data = random_split(banknotedataset, lengthss)
 
@@ -51,8 +49,6 @@ def train_banknot():
 
     model = BanknoteModel(input_dim, output_dim)
     
-    for param in model.parameters():
-        param.requires_grad_= True
 
 
     # print("rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr")
@@ -62,22 +58,21 @@ def train_banknot():
     ### set loss function and optimizer 
 
     # CentropyLoss = BanknoteLoss()
-    loss = torch.nn.BCELoss()
-    loss.requires_grad_ = True
-    print(loss.requires_grad_)
 
+
+    loss = torch.nn.BCELoss()
+  
     # optimizer = BanknoteOptimizer(model.parameters, lr=0.01)
     optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
 
     ### train model )
-    iter_dataloader_validation = iter(dataloader_validation)
+    # iter_dataloader_validation = iter(dataloader_validation)
 
-    number_of_batch_validation =len(dataloader_validation)
-    counter_valid=0
+    # number_of_batch_validation =len(dataloader_validation)
+    # counter_valid=0
 
-    # for data in range(len(dataloader_validation)):
-    #     (data, label) = next(iter_dataloader_validation)
-    #     print(data ,label)
+
+
 
     for epoch in range(num_epoch):
 
@@ -86,6 +81,7 @@ def train_banknot():
             optimizer.zero_grad()
             out = model(data_batch)
             labels = label_batch.view(-1,1)
+            
             # out = (out>=0.5).float()   #### lazem nist taghir koneh? va aya age tageer\????
             # bedam requires_grad ham false mish???
             # _, predicted = torch.max(out, 1)
@@ -96,17 +92,16 @@ def train_banknot():
             optimizer.step()
 
         if epoch % 9 == 0:
-            if counter_valid<number_of_batch_validation :
-                with torch.no_grad():
-                    model.eval()
-                    (data, label) = next(iter_dataloader_validation)
-                    out = model(data)
-                    label_val = label.view(-1,1)
-                    loss_value_valid=loss(out, label_val)
-                    print('Epoch [%d/%d] Train Loss: %.4f' % (epoch , num_epoch,\
-                    loss_value.item()))
-                    print('Epoch [%d/%d] Validation Loss: %.4f' % (epoch , num_epoch, \
-                    loss_value_valid.item()))
+            with torch.no_grad():
+                model.eval()
+                (data, label) = next(iter(dataloader_validation))
+                out = model(data)
+                label_val = label.view(-1,1)
+                loss_value_valid=loss(out, label_val)
+                print('Epoch [%d/%d] Train Loss: %.4f' % (epoch , num_epoch,\
+                loss_value.item()))
+                print('Epoch [%d/%d] Validation Loss: %.4f' % (epoch , num_epoch, \
+                loss_value_valid.item()))
 
     
 # with torch.no_grad        
