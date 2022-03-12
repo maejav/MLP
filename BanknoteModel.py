@@ -5,7 +5,6 @@ import torch.nn.functional as F
 
 ### set hyper parameter 
 hiddenstateL1=10
-output_dim=1
 
 class BanknoteModel(torch.nn.Module):
 
